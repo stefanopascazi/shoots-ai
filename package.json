@@ -6,7 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "pretypecheck": "npm run sync-content",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
