@@ -64,6 +64,11 @@ export const docsNav: DocsNavGroup[] = [
       { slug: ["commands", "setup"], title: "setup", summary: "Provision exiftool, LibRaw and the model" },
       { slug: ["commands", "doctor"], title: "doctor", summary: "Environment health check" },
       { slug: ["commands", "update"], title: "update", summary: "Self-update the standalone binary" },
+      {
+        slug: ["commands", "release-notes"],
+        title: "release-notes",
+        summary: "The migration steps this release needs",
+      },
     ],
   },
   {
@@ -71,6 +76,7 @@ export const docsNav: DocsNavGroup[] = [
     icon: "settings",
     items: [
       { slug: ["configuration"], title: "Configuration", summary: "~/.shoots layout, every environment variable" },
+      { slug: ["migrations"], title: "Migration notes", summary: "What each release asks of you, version by version" },
       { slug: ["troubleshooting"], title: "Troubleshooting", summary: "Common failures and their fixes" },
       { slug: ["development"], title: "Development", summary: "Monorepo layout, build, release process" },
     ],
