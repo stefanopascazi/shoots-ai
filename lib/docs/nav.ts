@@ -57,6 +57,11 @@ export const docsNav: DocsNavGroup[] = [
       { slug: ["commands", "exif"], title: "exif", summary: "Batch read/write EXIF·IPTC·XMP metadata" },
       { slug: ["commands", "cull"], title: "cull", summary: "Focus-aware blur detection and review" },
       { slug: ["commands", "rate"], title: "rate", summary: "0–5 star ratings via the ONNX CLIP model" },
+      {
+        slug: ["commands", "triage"],
+        title: "triage",
+        summary: "The marks cull/rate record before they reach a sidecar",
+      },
       { slug: ["commands", "embeddings"], title: "embeddings", summary: "Profile-neutral CLIP export" },
       { slug: ["commands", "match"], title: "match", summary: "Learn your eye from pairwise duels" },
       { slug: ["commands", "develop"], title: "develop", summary: "Personal develop-setting predictor" },
