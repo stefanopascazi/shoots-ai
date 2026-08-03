@@ -16,10 +16,44 @@ Originals are never mutated or deleted. Concretely:
 | `exif` | Writes tags but keeps exiftool's `*_original` backups (unless `--overwrite-original`). |
 | `cull` | Keepers are never touched. Rejects are relocated to `--dest`. Nothing is deleted. |
 | `rate` | Writes sidecars next to the file; refuses to overwrite an existing `.xmp`. |
+| `triage` | `apply` merges into sidecars, never replaces them. `clean` only touches `~/.shoots`. |
 | `embeddings` | Read-only on your photos; writes only into `--out`. |
 | `develop` | Read-only on your photos; writes datasets, profiles and `.xmp` sidecars. |
 
 There is no `shoots delete`, and no command removes an original file.
+
+---
+
+## 1b. Only the write path creates a sidecar
+
+A shoot runs `cull` → `rate` → `develop`. If each step wrote its own `.xmp`, the
+last would win — `develop` templates the file to emit `crs:`, and every editor
+rewrites sidecars on its own terms. Three commands writing one file in sequence
+loses data by construction.
+
+So the steps before the last one record **marks** under `~/.shoots/triage`
+instead:
+
+| Stage | Writes |
+| --- | --- |
+| `cull --mark`, `rate --mark` | A fragment in the store. Nothing next to your photographs. |
+| `develop edit`, `triage apply` | The sidecar — `crs:` plus every pending mark, merged. |
+
+Two properties follow, and both are the point:
+
+- **Marks compose.** Rating a shoot you already culled adds stars to the same
+  record instead of overwriting the rejection.
+- **Marks are meanings, not colours.** A mark says `reject`; which colour that
+  becomes is decided at write time, from a label set you can remap per editor
+  (see [Configuration](./configuration.md#label-sets)). `xmp:Label` is a standard
+  field holding a non-standard, localized value — so the vocabulary belongs at
+  the edge, not in the store.
+
+Marks are keyed by absolute path, and `rename` / `cull --dest` follow the files
+they move. Something else moving them orphans the mark;
+`shoots triage clean --orphans` collects those.
+
+See [`triage`](./commands/triage.md).
 
 ---
 
@@ -131,6 +165,33 @@ internal batch; below that you get elapsed time only.
 
 Once the file list is known, the interactive Ink progress view takes over, showing
 completed/total and the current filename.
+
+### Stage 3 — the fit
+
+`develop train` — and therefore `develop init`, `develop learn` and
+`develop refine`, which all end in a refit — is neither of the above. It is one
+long synchronous computation: no files to count, and nothing else can run while
+it works, so a spinner would sit frozen on its first frame.
+
+It reports a **determinate bar** instead, pushed out from inside the fit:
+
+```
+████████░░░░░░░░░░░░░░░░  33%  Fitting the profile · color frame · tone · gate — 2m05s, ~4m10s left
+✓ Fitting the profile — 553 edited images (7m02s)
+```
+
+The estimate comes from the rate measured so far. It is honest about the
+denominator from the first tick: every pass is one parameter group of one head,
+and how many there are is known before a single fold is fitted.
+
+**This is the slow part of the tool.** Five hundred photographs is minutes, and
+the cost is in the held-out evaluation — each parameter's λ is re-chosen inside
+every fold, for both heads — not in the fitting itself.
+
+Unlike the phase spinners, the bar still reports off a TTY (one line per tenth,
+no `--verbose` needed): a refit inside the interactive shell runs as a child with
+a piped stdout, and a fit that printed nothing for minutes there is exactly the
+thing this exists to prevent. `--json` is silent, as always.
 
 ### Why this matters on a NAS
 
