@@ -4,6 +4,10 @@
  * Titles mirror `docs/README.md` and `docs/commands/README.md`; the order here
  * is also the prev/next order of the pager. `assertNavCoversContent` fails the
  * build if a markdown file lands in `docs/` without being listed.
+ *
+ * New and removed pages are patched in here by the shoots repo's
+ * `scripts/sync-webapp-content.mjs`, from the README tables; edits by hand are
+ * still fine — the sync only touches entries that are missing or orphaned.
  */
 
 export interface DocsNavItem {
@@ -65,6 +69,11 @@ export const docsNav: DocsNavGroup[] = [
       { slug: ["commands", "embeddings"], title: "embeddings", summary: "Profile-neutral CLIP export" },
       { slug: ["commands", "match"], title: "match", summary: "Learn your eye from pairwise duels" },
       { slug: ["commands", "develop"], title: "develop", summary: "Personal develop-setting predictor" },
+      {
+        slug: ["commands", "pipeline"],
+        title: "pipeline",
+        summary: "Run a YAML pipeline: shoots commands in order, sharing variables",
+      },
       { slug: ["commands", "schedule"], title: "schedule", summary: "Unattended daily refine via the OS scheduler" },
       { slug: ["commands", "setup"], title: "setup", summary: "Provision exiftool, LibRaw and the model" },
       { slug: ["commands", "doctor"], title: "doctor", summary: "Environment health check" },
