@@ -8,9 +8,9 @@ import { site } from "@/lib/site";
 import runScreen from "@/public/assets/screens/run.png";
 
 const guarantees = [
+  "Your photographs never leave your machine — no upload, no cloud",
+  "Free, with no subscription to run any of it",
   "Nothing is ever deleted or overwritten",
-  "Everything runs locally — no cloud, no upload",
-  "Every command speaks --json and honours --dry-run",
 ];
 
 export function Hero() {
@@ -27,15 +27,21 @@ export function Hero() {
           </span>
 
           <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-fg sm:text-5xl">
-            Batch automation for professional{" "}
-            <span className="text-accent">photography workflows</span>.
+            It learns how <span className="text-accent">you</span> develop, then develops the
+            next shoot for you.
           </h1>
 
           <p className="max-w-xl text-base leading-relaxed text-muted">
-            <strong className="font-semibold text-fg">shoots</strong> is a CLI for photographers
-            who shoot a lot and edit in Lightroom, Capture One or anything else. It is not an
-            editor and not a catalog: it sits before and after your editor and automates the
-            boring parts of a shoot.
+            <strong className="font-semibold text-fg">shoots</strong> trains a develop profile on
+            the catalog you have <em>already</em> edited, and predicts a per-image starting point
+            for photographs it has never seen — written as XMP sidecars your editor opens. Around
+            it sits the rest of the shoot: offload, rename, metadata, focus-aware culling, star
+            ratings.
+          </p>
+
+          <p className="max-w-xl text-sm leading-relaxed text-muted">
+            All of it on your own machine. The model is trained on your photographs, by your
+            computer, and neither the images nor the profile are ever uploaded anywhere.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -48,10 +54,10 @@ export function Hero() {
               <ArrowRight className="size-4 opacity-60" aria-hidden />
             </Link>
             <Link
-              href="/docs/commands"
+              href="/docs/develop-predictor"
               className="inline-flex items-center gap-2 rounded-full border border-border-base px-5 py-2.5 text-sm font-medium text-muted transition-colors hover:text-fg"
             >
-              Command reference
+              How the predictor works
             </Link>
           </div>
 

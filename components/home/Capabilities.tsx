@@ -5,18 +5,18 @@ import { SectionHeading } from "@/components/home/SectionHeading";
 
 const capabilities = [
   {
-    icon: HardDriveDownload,
-    command: "shoots import",
-    title: "Offload and rename",
-    body: "Copy a card into a dated catalog, checksum-verified. Original filenames are kept unless you ask for a template.",
-    href: "/docs/commands/import",
+    icon: Sparkles,
+    command: "shoots develop",
+    title: "Learn your edit",
+    body: "Fit a predictor on a catalog you have already developed, and get a per-image starting point as an XMP sidecar.",
+    href: "/docs/develop-predictor",
   },
   {
-    icon: Tags,
-    command: "shoots exif",
-    title: "Stamp metadata",
-    body: "Artist, copyright, keywords — any EXIF·IPTC·XMP tag — written across a whole folder in one pass.",
-    href: "/docs/commands/exif",
+    icon: Brain,
+    command: "shoots match",
+    title: "Learn your eye",
+    body: "Duel your own photos two at a time; the outcomes train a rating profile that generalizes your taste to work you have never judged.",
+    href: "/docs/commands/match",
   },
   {
     icon: Target,
@@ -33,18 +33,18 @@ const capabilities = [
     href: "/docs/commands/rate",
   },
   {
-    icon: Brain,
-    command: "shoots match",
-    title: "Learn your eye",
-    body: "Duel your own photos two at a time; the outcomes train a rating profile that generalizes your taste to work you have never judged.",
-    href: "/docs/commands/match",
+    icon: HardDriveDownload,
+    command: "shoots import",
+    title: "Offload and rename",
+    body: "Copy a card into a dated catalog, checksum-verified. Original filenames are kept unless you ask for a template.",
+    href: "/docs/commands/import",
   },
   {
-    icon: Sparkles,
-    command: "shoots develop",
-    title: "Learn your edit",
-    body: "Fit a predictor on a catalog you have already developed, and get a per-image starting point as an XMP sidecar.",
-    href: "/docs/develop-predictor",
+    icon: Tags,
+    command: "shoots exif",
+    title: "Stamp metadata",
+    body: "Artist, copyright, keywords — any EXIF·IPTC·XMP tag — written across a whole folder in one pass.",
+    href: "/docs/commands/exif",
   },
 ];
 
@@ -53,9 +53,9 @@ export function Capabilities() {
     <section className="border-b border-border-soft bg-bg-muted">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <SectionHeading
-          eyebrow="What it does"
-          title="Six jobs, one binary"
-          description="Each one is a standalone command. Run them by hand, chain them in a script, or drive them from the interactive shell."
+          eyebrow="The whole shoot"
+          title="Two things that learn from you, four that save you an evening"
+          description="The two profiles — how you edit, and what you keep — are what shoots is for. The rest is the work around them: getting the card in, naming it, stamping it, and throwing out the frames that missed. Each is a standalone command: run them by hand, chain them in a script, or drive them from the interactive shell."
         />
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

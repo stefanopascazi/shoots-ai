@@ -2,9 +2,9 @@ import meta from "@/content/meta.json";
 
 export const site = {
   name: "shoots",
-  tagline: "Batch automation for professional photography workflows.",
+  tagline: "Your own develop style, learned locally and predicted on the next shoot.",
   description:
-    "A scriptable command-line tool that does the tedious work around your editor: offload, stamp metadata, cull out-of-focus frames, star-rate and learn your own develop style. Fully local, never destructive.",
+    "shoots trains a develop profile on the catalog you have already edited, then predicts a per-image starting point for photographs it has never seen — as XMP sidecars your editor reads. Culling, star ratings, offload and metadata around it. All of it on your own machine: nothing is uploaded, and there is no subscription.",
   url: "https://github.com/stefanopascazi/shoots",
   version: meta.version,
   repo: "https://github.com/stefanopascazi/shoots",

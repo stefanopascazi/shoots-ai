@@ -27,7 +27,14 @@ export const docsNav: DocsNavGroup[] = [
   {
     name: "Overview",
     icon: "compass",
-    items: [{ slug: [], title: "Introduction", summary: "What shoots is, and what it is not" }],
+    items: [
+      { slug: [], title: "Introduction", summary: "What shoots is, and what it is not" },
+      {
+        slug: ["roadmap"],
+        title: "Direction",
+        summary: "Design goals, what is being worked on, and what shoots will not become",
+      },
+    ],
   },
   {
     name: "Start here",
