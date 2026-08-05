@@ -40,6 +40,11 @@ export const docsNav: DocsNavGroup[] = [
     name: "Start here",
     icon: "rocket",
     items: [
+      {
+        slug: ["roadmap"],
+        title: "Direction",
+        summary: "Design goals, what is being worked on, and what shoots will not become",
+      },
       { slug: ["getting-started"], title: "Getting started", summary: "Install, setup, doctor, your first import" },
       { slug: ["concepts"], title: "Core concepts", summary: "Non-destructive rules, exit codes, JSON output" },
       { slug: ["shell"], title: "Interactive shell", summary: "The fullscreen shell, / palette, @ mentions" },
