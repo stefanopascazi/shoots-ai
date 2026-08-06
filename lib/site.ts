@@ -18,19 +18,21 @@ export const site = {
   },
 } as const;
 
+// Served through /install.sh and /install.ps1 on our own domain: they redirect
+// to the release asset, so GitHub counts the install in its download_count.
+const installBase = process.env.NEXT_PUBLIC_SITE_ORIGIN || "https://www.shoots-ai.com";
+
 export const installCommands = [
   {
     id: "unix",
     label: "macOS / Linux",
     lang: "sh",
-    command:
-      "curl -fsSL https://raw.githubusercontent.com/stefanopascazi/shoots/main/install.sh | bash",
+    command: `curl -fsSL ${installBase}/install.sh | bash`,
   },
   {
     id: "windows",
     label: "Windows",
     lang: "powershell",
-    command:
-      "irm https://raw.githubusercontent.com/stefanopascazi/shoots/main/install.ps1 | iex",
+    command: `irm ${installBase}/install.ps1 | iex`,
   },
 ] as const;
