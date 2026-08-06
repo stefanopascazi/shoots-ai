@@ -113,6 +113,7 @@ shoots develop edit <path> [options]
 | --- | --- | --- |
 | `--profile <file>` | the one `init` wrote | Profile to apply |
 | `--treatment <t>` | `auto` | `auto` \| `color` \| `bw` |
+| `--editor <id>` | `acr` | Which editor to read from and write to: `acr` \| `rapidraw` |
 | `--camera-profile <name>` | catalog's own | Base rendering to assume and write out |
 | `--baseline <mode>` | `external` | Must match the profile's, or `predict` refuses |
 | `--force` | off | Overwrite sidecars that already carry a real edit |
@@ -193,6 +194,7 @@ shoots develop export <path> --out <file> [options]
 | Option | Default | Description |
 | --- | --- | --- |
 | `--out <file>` | **required** | Write the JSONL dataset here |
+| `--editor <id>` | `acr` | Which editor's develop settings to read: `acr` \| `rapidraw` |
 | `--baseline <mode>` | `embedded-preview` | Baseline render strategy: `embedded-preview` \| `external` |
 | `--edited-only` | off | Only run the expensive embedding/render on files that actually carry develop settings |
 | `--model <kind>` | `onnx` | Inference backend |
@@ -622,9 +624,10 @@ shoots develop predict --data <file> --profile <file> [options]
 | `--data <file>` | **required** | Dataset from `develop export` (the **new** set) |
 | `--profile <file>` | **required** | Profile JSON from `develop train` |
 | `--treatment <t>` | `auto` | Which branch to apply: `auto` \| `color` \| `bw` |
+| `--editor <id>` | `acr` | Which editor's format to write predictions in: `acr` \| `rapidraw` |
 | `--camera-profile <name>` | catalog's own | Base rendering to assume and write out |
 | `--out <file>` | stdout | Write predictions JSON here |
-| `--xmp <dir>` | — | Also write a Lightroom-readable `.xmp` sidecar per image into this dir |
+| `--sidecars <dir>` | — | Also write an editor-readable sidecar per image into this dir (`.xmp` for `acr`, `.rrdata` for `rapidraw`) |
 
 `--treatment` is a genuine creative choice at inference time — at train time it is
 read off the edit, but for a new frame nobody has decided colour vs B&W yet.
@@ -652,7 +655,7 @@ either a bare profile name or a full key:
 
 ```sh
 shoots develop predict --data new.jsonl --profile profiles/my-style.json \
-  --camera-profile "Adobe Standard v2 + Adobe Color" --xmp ./out-xmp/
+  --camera-profile "Adobe Standard v2 + Adobe Color" --sidecars ./out-sidecars/
 ```
 
 A Look read from embedded crs (DNG/JPEG rather than a sidecar) has no element to
@@ -682,9 +685,9 @@ exporting the set you want to predict on.
 # Export the new shoot, then predict. --baseline must match the profile's.
 shoots develop export ~/Shoots/2026-07-new --baseline external --out new.jsonl
 
-# Colour treatment, XMP sidecars for Lightroom
+# Colour treatment, sidecars for the chosen editor
 shoots develop predict --data new.jsonl --profile profiles/my-style.json \
-  --treatment color --xmp ./out-xmp/
+  --treatment color --sidecars ./out-sidecars/
 
 # Predictions as JSON for inspection
 shoots develop predict --data new.jsonl --profile profiles/my-style.json \
@@ -692,11 +695,13 @@ shoots develop predict --data new.jsonl --profile profiles/my-style.json \
 
 # A B&W variant of the same set
 shoots develop predict --data new.jsonl --profile profiles/my-style.json \
-  --treatment bw --xmp ./out-xmp-bw/
+  --treatment bw --sidecars ./out-sidecars-bw/
 ```
 
-`--xmp` drops a Lightroom-readable sidecar next to each image — a **non-destructive
-starting point** to refine, not a finished edit.
+`--sidecars` drops one editor-readable sidecar per image — a **non-destructive
+starting point** to refine, not a finished edit. The adapter picks the format and
+the filename, so the flag is not called `--xmp` any more; `--xmp` still works as a
+deprecated alias and warns.
 
 ---
 
@@ -1081,8 +1086,8 @@ shoots develop diagnose --data train.jsonl
 # 3. Export the new shoot. Same --baseline as step 1, or predict refuses the pair.
 shoots develop export ~/Shoots/2026-07-new --baseline external --out new.jsonl
 
-# 4. Predict, as XMP sidecars — keep --out, `feedback` needs it later
-shoots develop predict --data new.jsonl --profile profiles/my-style.json   --treatment color --xmp ./out-xmp/ --out predictions.json
+# 4. Predict, as sidecars — keep --out, `feedback` needs it later
+shoots develop predict --data new.jsonl --profile profiles/my-style.json   --treatment color --sidecars ./out-sidecars/ --out predictions.json
 
 # 5. After developing them, see how much of the prediction survived
 shoots develop feedback --predictions predictions.json

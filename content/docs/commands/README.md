@@ -101,7 +101,7 @@ shoots rate <path> [--model onnx] [--profile <name>] [--mark] [--write-xmp]
                    [--concurrency 4] [--dry-run] [--json]
 
 shoots triage list  [<path>] [--json]
-shoots triage apply <path> [--editor acr] [--redo] [--dry-run] [--json]
+shoots triage apply <path> [--editor acr|rapidraw] [--redo] [--dry-run] [--json]
 shoots triage clean [--orphans] [--dry-run] [--json]
 
 # ── ML tooling ────────────────────────────────────────────────────────────────
@@ -128,7 +128,7 @@ shoots develop train  --data <f> --name <n> --out <f> [--lambda auto|<n>] [--fol
                       [--boldness 0] [--anchor-gain 1] [--review] [--all]
 shoots develop predict --data <f> --profile <f> [--treatment auto|color|bw]
                                                 [--camera-profile <name>]
-                                                [--out <f>] [--xmp <dir>]
+                                                [--out <f>] [--sidecars <dir>]
 shoots develop feedback --predictions <f> [--out <f>] [--journal <f>|--no-journal]
                                           [--min-moved <n>] [--json]
 shoots develop refine <shoot> [--measure-only] [--dry-run] [--json]

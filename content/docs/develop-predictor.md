@@ -10,17 +10,100 @@ Command reference: [`shoots develop`](./commands/develop.md).
 ## Scope — read this first
 
 **What it does:** predicts the *global look* as an Adobe Camera Raw (process 2012)
-develop vector, and writes it as an `.xmp` sidecar.
+develop vector, and writes it into a sidecar the target editor reads.
 
 **What it does not do:** local masks, generative edits, retouching, or a finished
 edit. The goal is **the best starting point to refine**, not a delivered image.
 
 **It is editor-agnostic.** The engine runs without any host editor installed. An
 **adapter** decides how an edit is read and written, selected with `--editor`.
-There is one today — `acr`, the default — which speaks XMP `crs:` sidecars and is
-read by Lightroom Classic, Camera Raw and Bridge. Capture One does *not* read
-develop adjustments from XMP and will need an adapter of its own. Plugins for
-specific editors are thin fronts over this same engine, not a dependency of it.
+Plugins for specific editors are thin fronts over this same engine, not a
+dependency of it.
+
+| `--editor` | Sidecar | State |
+| --- | --- | --- |
+| `acr` (default) | `<name>.xmp` | XMP `crs:`, read by Lightroom Classic, Camera Raw and Bridge |
+| `rapidraw` | `<name.ext>.rrdata` | Implemented and working end to end. **The numeric mapping is still being compared against real edits** — see below |
+
+Capture One does *not* read develop adjustments from XMP and will need an adapter
+of its own.
+
+[RapidRAW](https://github.com/CyberTimon/RapidRAW) is an independent open-source
+RAW editor (AGPL-3.0) by CyberTimon. Shoots is not affiliated with it and bundles
+none of its code: the adapter writes its sidecar format, which is all
+interoperating requires.
+
+---
+
+## The RapidRAW adapter is not yet calibrated
+
+The plumbing is done and verified — a shoot goes in, `.rrdata` sidecars come out,
+RapidRAW opens them. **What has not been established is that the numbers are
+right**, and two independent reasons say to expect a systematic offset rather
+than a faithful transfer. Neither is a bug; both are properties of predicting for
+one editor from a style learned in another.
+
+### 1. Your profile was learned from a different editor
+
+A profile is fitted on a catalog *you developed*, and today that catalog is
+almost certainly Lightroom. The model therefore predicts ACR numbers, and the
+adapter converts them with RapidRAW's own gearing — Shadows ×1.5, Tint ÷1.5, HSL
+hue ×0.75, 150 mired of white-balance travel.
+
+Those factors are taken from RapidRAW's own ACR preset importer
+(`src-tauri/src/preset_converter.rs`), which makes them the best available
+answer — but they are a *preset importer's* approximation, not a colorimetric
+match. The two applications demosaic differently, tone-map differently, and mean
+different things by "contrast 20". A slider that agrees to the digit can still
+render differently.
+
+**What this means in practice:** treat the prediction as a starting point learned
+from your taste, expressed in a second application's units. Judge whether it
+moves in the right *direction* and by a sensible *relative* amount, not whether
+it matches what Lightroom would have shown you.
+
+### 2. RapidRAW has no equivalent of the base rendering
+
+Every predicted slider in ACR is an offset from a base rendering — `develop
+predict` prints which one, typically `Adobe Standard v2 + Adobe Color`. That
+rendering is Adobe's: a camera profile plus a Look, with its own tone curve and
+colour behaviour before a single slider moves.
+
+RapidRAW has no such concept and no equivalent starting point. It renders from
+its own baseline, so the offsets land on a foundation that is not the one they
+were measured against.
+
+**This is the larger of the two effects, and it is systematic.** If the whole
+shoot comes out uniformly flat, or uniformly warm, suspect this rather than the
+model. It is also the more correctable one — `develop calibrate` measures a
+constant offset from your own corrections and applies it on top of every
+prediction, which is exactly the shape of this error.
+
+Distinguishing the two: an offset affecting *every frame equally* is the base
+rendering; predictions that are right on some frames and wrong on others are the
+model, and the in-shoot column of the training report is the number to read.
+
+---
+
+## What the RapidRAW adapter cannot carry at all
+
+Separate from calibration: these are things the format has no room for, and the
+adapter refuses or drops them rather than approximating.
+
+- **No black-and-white.** RapidRAW has no grayscale mode and no channel mixer, so
+  the `bw` branch has nowhere to land. `--treatment bw --editor rapidraw` is
+  refused rather than flattened into a desaturation.
+- **White balance is relative.** RapidRAW states it as a shift in mired against
+  the as-shot temperature. Reading an edit therefore needs the RAW's own Kelvin,
+  which is why the WB target is completed during the capture pass rather than the
+  sidecar read.
+- **Geared sliders round-trip approximately.** Shadows also saturates, so an ACR
+  value past ±67 comes back clipped.
+- **The parametric curve is dropped.** RapidRAW's point and parametric curves are
+  mutually exclusive — only one renders — so a prediction writes the point curve
+  and pins `curveMode`.
+- **Masks, crop, lens corrections and LUTs are never predicted**, and never
+  touched: the emitter amends the existing `.rrdata` rather than templating it.
 
 ---
 
