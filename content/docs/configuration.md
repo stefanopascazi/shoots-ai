@@ -166,8 +166,16 @@ Partial overrides merge over the defaults, so remapping one label leaves the res
 alone. Unknown keys and empty values are rejected outright, before anything is
 written — a shoot half-labelled in the wrong vocabulary is worse than an error.
 
-`<editor>` is the `--editor` id (`acr` today). Switching editors later means
-editing one file, not re-culling.
+`<editor>` is the `--editor` id — `acr` or `rapidraw`. Switching editors later
+means editing one file, not re-culling.
+
+The defaults differ by editor, because the editors do. Lightroom matches a label
+by name against a *localized* set, so `acr` defaults to Adobe's English colours
+(`Red`, `Green`, `Yellow`, `Purple`) and an Italian install wants an override.
+RapidRAW stores the label as a `color:<name>` tag against a fixed enum, so
+`rapidraw` defaults to its five lowercase names (`red`, `green`, `yellow`,
+`purple`) and overriding it means choosing a *different* colour, not translating
+the same one.
 
 ---
 
@@ -209,4 +217,4 @@ clobbering it. `shoots doctor` reports what is actually resolved.
 | No exiftool, `cull` on JPEGs | Works. The aperture column is omitted (it is report context, not a decision input). |
 | No exiftool, `exif` / `rename` | Fails with a clear message — those commands *are* exiftool. |
 | No CLIP model | `rate`, `embeddings` and `develop export` fail with a message pointing at `shoots setup`. |
-| No LibRaw and no `SHOOTS_RAW_DEVELOPER` | `develop export --baseline external` fails; `--baseline embedded-preview` (the default) still works. |
+| No LibRaw and no `SHOOTS_RAW_DEVELOPER` | Anything on `--baseline external` fails — which includes `develop init` and `develop edit`, where it is the default. Fall back to `--baseline embedded-preview`, at the cost described in [the predictor guide](./develop-predictor.md#the-baseline-render--why-it-matters-most). |
