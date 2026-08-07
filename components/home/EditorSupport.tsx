@@ -5,14 +5,20 @@ import { SectionHeading } from "@/components/home/SectionHeading";
 /**
  * Which editors the develop predictor can read from and write back to.
  *
- * Mirrors the adapter registry in the CLI (`develop/adapters/`): ACR is the one
- * adapter that exists, the rest are the queue. Anything moved here must move
- * there first — this table is a claim about shipped code.
+ * Mirrors the adapter registry in the CLI (`develop/adapters/`): ACR and
+ * RapidRAW (0.7.0) are the adapters that exist, the rest are the queue.
+ * Anything moved here must move there first — this table is a claim about
+ * shipped code.
  */
 const editors = [
   {
     name: "Lightroom Classic",
     detail: "Camera Raw and Bridge along with it — the same crs vocabulary, the same sidecars",
+    state: "shipping",
+  },
+  {
+    name: "RapidRAW",
+    detail: "Shipped in 0.7.0 — a younger, faster host, with sidecars of its own",
     state: "shipping",
   },
   {
@@ -23,11 +29,6 @@ const editors = [
   {
     name: "RawTherapee",
     detail: "Sidecar profiles rather than XMP",
-    state: "queued",
-  },
-  {
-    name: "RapidRAW",
-    detail: "A younger, faster host worth meeting early",
     state: "queued",
   },
   {
@@ -53,7 +54,7 @@ export function EditorSupport() {
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <SectionHeading
           eyebrow="Editor support"
-          title="Lightroom today, one adapter at a time after that"
+          title="Lightroom and RapidRAW today, one adapter at a time after that"
           description="Develop settings are not portable between editors, and no amount of file-format work makes them so: XMP is only a container, crs: is Adobe's private vocabulary inside it, and an exposure of +0.35 means whatever the host's pipeline says it means. So each editor gets its own adapter — and the adapter is the only part that has to know. The profile, the trained model and the evaluation stay in one vocabulary behind it."
         />
 
