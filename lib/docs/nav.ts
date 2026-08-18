@@ -88,6 +88,11 @@ export const docsNav: DocsNavGroup[] = [
       },
       { slug: ["commands", "schedule"], title: "schedule", summary: "Unattended daily refine via the OS scheduler" },
       { slug: ["commands", "setup"], title: "setup", summary: "Provision exiftool, LibRaw and the model" },
+      {
+        slug: ["commands", "cache"],
+        title: "cache",
+        summary: "The derived numbers runs reuse (measurements, embeddings): status, clear, prune",
+      },
       { slug: ["commands", "doctor"], title: "doctor", summary: "Environment health check" },
       { slug: ["commands", "update"], title: "update", summary: "Self-update the standalone binary" },
       {

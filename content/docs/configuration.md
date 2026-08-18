@@ -73,11 +73,23 @@ export SHOOTS_HOME=/Volumes/Field/shoots-home
 shoots setup
 ```
 
+### Derived-value cache
+
+| Variable | Effect |
+| --- | --- |
+| `SHOOTS_CACHE` | Set to `0` to recompute everything, every run. Per run, use `--no-cache`. |
+| `SHOOTS_CACHE_MAX` | Ceiling on `~/.shoots/cache`. Default `1GB`; accepts `512MB`, `2GB` or plain bytes. Crossing it drops whole shoots, oldest first. |
+
+The cache holds derived numbers only — measurements, embeddings — never image
+data, which is why ~150 MB covers a 100,000-frame catalog. See
+[`shoots cache`](./commands/cache.md).
+
 ### External tools
 
 | Variable | Effect |
 | --- | --- |
 | `SHOOTS_EXIFTOOL` | Path to an existing exiftool binary. Wins over the provisioned one — no download happens. |
+| `SHOOTS_EXIFTOOL_DAEMON` | Set to `0` to start a fresh exiftool per call instead of keeping one alive for the whole command. Slower by roughly 25×; only useful when isolating a suspected exiftool bug. |
 | `SHOOTS_LIBRAW` | Path to an existing LibRaw `dcraw_emu` binary. |
 | `SHOOTS_RAW_DEVELOPER` | An arbitrary RAW-developer executable for `develop export --baseline external`. Wins over the provisioned LibRaw. |
 | `SHOOTS_RAW_DEVELOPER_ARGS` | Argument template for the above. `{in}` and `{out}` are substituted per file. |
