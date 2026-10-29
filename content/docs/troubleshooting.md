@@ -287,7 +287,9 @@ Frames rescued this way show as `sharp*` with `rescued: true`.
 
 ### `--review needs the interactive shell`
 
-`--review` drives a live UI, so it only works inside the shell:
+`--review` is deprecated: review the verdicts in the shoots app instead
+([Reviewing the verdicts](./commands/cull.md#reviewing-the-verdicts)). Until the
+shell is removed, it still works there:
 
 ```sh
 shoots                                   # opens the shell
@@ -448,7 +450,9 @@ See [Migration notes](./migrations.md).
 
 ### The dataset is empty
 
-Almost always `--edited-only` on a folder with no develop settings.
+Almost always `--edited-only` on a folder with no develop settings. That case
+now stops with an error (exit 1), so `develop init` never goes on to fit the
+dataset an earlier run left behind.
 
 ```sh
 # Training set from an EDITED catalog — --edited-only is correct

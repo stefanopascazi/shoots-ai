@@ -439,6 +439,9 @@ shoots develop refine ~/Shoots/2026-07-new
 of the steps they wrap, and accept `--dry-run`. `edit` refuses to overwrite
 sidecars that already carry a real edit unless you pass `--force`.
 
+`init` and `export` also take `--catalog <file>`: the develop settings then come
+from a Lightroom catalog export written by the plug-in, not from the sidecars.
+
 Import the sidecars in Lightroom and every frame opens on your look, ready to
 refine. `shoots develop status` says what the machine holds; `shoots develop
 clean` drops the per-shoot working files and leaves the profile alone.
@@ -488,7 +491,9 @@ never fill it in. Every run is therefore recorded in
 `~/.shoots/develop/feedback.jsonl` and the breakdown is computed over everything
 seen so far, with this run's own acceptance quoted separately above it. Ten
 shoots of eight carry the same signal as one shoot of eighty; `develop status`
-says how far along the journal is, and `develop clean` never touches it.
+says how far along the journal is, and `develop clean` leaves it alone unless
+you name it: `--only journal`. `--only` takes any of `shoots`, `dataset`,
+`profile`, `calibration` (keeps the fit) and `journal`.
 
 ### Closing the loop — `develop calibrate`
 

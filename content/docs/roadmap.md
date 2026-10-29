@@ -10,8 +10,9 @@ What each release asks of you is in the [migration notes](./migrations.md).
 
 > **Direction change.** Until launch, `shoots` targets **Lightroom Classic
 > only**, through a plugin and a local app it opens. The interactive shell and
-> every other editor are paused, and XMP sidecars are being replaced by reading
-> and writing the Lightroom catalog directly.
+> every other editor are paused. The plugin reads and writes the Lightroom
+> catalog directly; the CLI on its own keeps writing XMP sidecars, so it stays
+> usable without the plugin.
 
 ---
 
@@ -51,10 +52,18 @@ In order:
   picks and labels written straight into the catalog, no sidecars.
 - **A local app the plugin opens.** Training, calibration and review in the
   browser, served on your machine: opening it from Lightroom starts the server,
-  closing it stops it.
-- **Train from the catalog.** The plugin exports your develop settings as JSON;
-  training reads that instead of XMP sidecars. XMP support is removed once this
-  is in place.
+  closing it stops it. Built on `@shoots/ui`, a shared design system (tokens,
+  dark/light themes, Preact components) meant for every shoots web surface.
+  Cull verdicts are reviewed there, and every one can be reversed: this
+  replaces the shell's `cull --review`.
+- **Send to Lightroom, and back.** Results and decisions made in the app go
+  straight into the catalog through the plugin, as one undo step: no sidecars,
+  nothing to re-read. Flags, stars and labels changed in Lightroom show up in
+  the app within seconds; the latest change wins.
+- **Train from the catalog.** The plugin exports your develop settings as JSON,
+  so training through the plugin does not depend on XMP sidecars being up to
+  date. Training and calibration start from the app and run on their own: they
+  finish even if Lightroom closes. The standalone CLI keeps training from sidecars.
 - **A closed beta that shares data.** Testers who opt in share derived
   measurements, never images, so the develop predictor can learn from many
   photographers instead of one. After the beta, sharing becomes an explicit
@@ -64,7 +73,7 @@ In order:
 
 | Editor | State |
 | --- | --- |
-| Lightroom Classic | **The focus** — via the plugin, reading and writing the catalog. The current XMP adapter is being replaced. |
+| Lightroom Classic | **The focus** — via the plugin, reading and writing the catalog. The standalone CLI keeps its XMP adapter. |
 | [RapidRAW](https://github.com/CyberTimon/RapidRAW) | **Paused** — the adapter works end to end, but is not maintained until after launch. |
 | darktable, RawTherapee, ON1 Photo RAW, Capture One | **Paused** until after launch. |
 

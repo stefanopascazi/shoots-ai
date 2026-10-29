@@ -19,7 +19,7 @@ so scripts are unaffected.
 | [`import`](./import.md) | Copy/move photos from a card into a catalog, renamed and checksum-verified |
 | [`rename`](./rename.md) | Batch-rename an already-imported folder in place |
 | [`exif`](./exif.md) | Batch read/write EXIF·IPTC·XMP metadata |
-| [`cull`](./cull.md) | Focus-aware blur detection; report, relocate rejects, or review interactively |
+| [`cull`](./cull.md) | Focus-aware blur detection; report or relocate rejects. Verdicts are reviewed in the shoots app |
 | [`rate`](./rate.md) | 0–5 star ratings + keyword suggestions via the ONNX CLIP model |
 | [`triage`](./triage.md) | The marks `cull`/`rate` record before they reach a sidecar: `list`, `apply`, `clean` |
 
@@ -117,13 +117,13 @@ shoots match train  [--name my-eye] [--out <f>] [--db <f>] [--lambda 1]
 
 shoots develop init <path> [--out-export <f>] [--out-train <f>] [--name <n>]
                            [--baseline external|embedded-preview] [--boldness 0]
-                           [--anchor-gain 1] [--review] [--dry-run]
+                           [--anchor-gain 1] [--review] [--catalog <f>] [--dry-run]
 shoots develop edit <path> [--profile <f>] [--treatment auto|color|bw] [--force]
                            [--no-apply-marks] [--dry-run]
 shoots develop status [--json]
-shoots develop clean  [--all] [--dry-run] [--json]
+shoots develop clean  [--all] [--only <parts>] [--dry-run] [--json]
 shoots develop export <path> --out <file> [--baseline embedded-preview|external]
-                                          [--edited-only] [--concurrency 4] [--json]
+                                          [--edited-only] [--catalog <f>] [--concurrency 4] [--json]
 shoots develop refresh-targets --data <f> --out <f> [--drop-unedited] [--json]
 shoots develop train  --data <f> --name <n> --out <f> [--lambda auto|<n>] [--folds 5]
                       [--boldness 0] [--anchor-gain 1] [--review] [--all]

@@ -38,7 +38,7 @@ focus map. It is fast, deterministic and needs no model.
 | `--dry-run` | off | Analyze and report, but relocate nothing and write no report file |
 | `--json` | off | Machine-readable JSON on stdout |
 | `--verbose` | off | Verbose logging on stderr |
-| `--review` | off | Interactive human-in-the-loop review — **shell only** |
+| `--review` | off | **Deprecated** — review the verdicts in the shoots app instead ([below](#reviewing-the-verdicts)); still works inside the shell |
 
 ---
 
@@ -249,48 +249,54 @@ shoots cull ./raw --concurrency 12 --json --out cull.json
 
 ---
 
-## Interactive review (`--review`)
+## Reviewing the verdicts
 
-Available **only inside the interactive shell** — it drives a live UI. In batch
-mode it exits `2` with a pointer to the shell.
+A cull verdict is a proposal, not a decision: a soft frame can be soft on
+purpose. The review lives in the **shoots app**, which you open from Lightroom
+Classic with **Library › Plug-in Extras › Open shoots**:
 
-```
-❯ /cull ./catalog --review --mark
-❯ /cull ./catalog --review --dest ./rejects
-```
+1. Open the folder in **Library** and choose **Find blurry**. The focus-aware
+   analysis runs over the whole folder and nothing is written.
+2. Frames the focus rescue kept (soft overall, sharp in one area, as with a wide
+   aperture) are marked **Review**, and **Review** walks you through only those.
+3. Every verdict can be changed. Open any photograph and flag it yourself:
+   **Pick** a frame shoots rejected, **Reject** one it kept, or leave it
+   **Unflagged**.
 
-The flow is designed to not waste your time:
+The cull is optional: any photograph can be flagged, rated and given a colour
+label by hand, with or without it. What you set always wins over what shoots
+proposed, field by field, and **Use the cull's verdict** / **Use shoots' rating**
+hand a field back.
 
-1. The focus-aware analysis runs over the whole folder.
-2. **Confident rejects are disposed of immediately** — marked, or relocated.
-   Keepers stay in place either way.
-3. You are handed *only* the uncertain shallow-DoF rescues — one card at a time.
+The viewer shows the global score, the focus peak, the aperture and a **focus
+map** over the photograph (soft → sharp) marking where focus actually landed.
+The keys are Lightroom's:
 
-Each review card shows the global score, the focus peak, the aperture, and a
-**focus heatmap** with a legend (soft → sharp) marking where focus actually landed.
+| Key | Action |
+| --- | --- |
+| `P` (or `K`) | Pick |
+| `X` (or `D`) | Reject |
+| `U` | Unflag |
+| `1`–`5` | Stars; `0` removes them |
+| `6` `7` `8` `9` | Red, yellow, green, blue label; the same key again removes it. Purple is on the panel. |
+| `S` | Skip — decide later |
+| `H` | Show or hide the focus map |
+| `←` `→` | Previous / next photograph |
+| `Esc` | Finish |
 
-| Key | Action | With `--mark` | With `--dest` |
-| --- | --- | --- | --- |
-| `K` | Keep | Records `--mark-keepers`, if you set one | The file stays where it is |
-| `D` | Discard | Records the reject label | Relocates it to `--dest` |
-| `P` | Preview — open the frame in your system image viewer | | |
-| `S` | Skip — decide later | | |
-| `Esc` | Finish the review | | |
+Your marks are kept on this computer, survive a re-run of the analysis, and
+reach Lightroom with **Send to Lightroom**. It works the other way too: flags,
+stars and labels you change in Lightroom show up in the app within seconds, and
+the latest change wins.
 
-Marks made here carry `reviewed: true`, so a decision you actually looked at is
-distinguishable from one a threshold produced.
+**Reset folder…** (and **Reset this photo…** in the viewer) forgets any of: the
+blur check, shoots' ratings, your marks, the send history. A reset happens in the
+app only — photos and Lightroom are not touched, and anything already sent stays
+in the catalog. **Setup › Clear app memory** forgets everything at once.
 
-Requirements and flags:
-
-- **`--mark` or `--dest` is required** — the review has to do *something* with
-  the discards. `--mark` records them and moves nothing; `--dest` relocates them.
-  `--mark-label` and `--mark-keepers` work here exactly as in batch.
-- `--copy` copies discards instead of moving them. Only meaningful with `--dest`.
-- `--dry-run` walks the entire flow without touching a single file — ideal for
-  learning the interface.
-
-Every other flag behaves identically in batch, so `shoots cull` stays fully
-scriptable. Only the review UI is interactive.
+> **`--review` in the shell is deprecated.** It still works inside the
+> interactive shell (`/cull <path> --review --mark`), and is removed together
+> with the shell. In batch mode it exits `2` with a pointer to the shoots app.
 
 ---
 
@@ -311,7 +317,8 @@ scriptable. Only the review UI is interactive.
       "verdict": "sharp",
       "rescued": true,
       "aperture": 1.4,
-      "pixelSource": "embedded-preview"
+      "pixelSource": "embedded-preview",
+      "focusMap": { "cols": 8, "rows": 8, "tiles": [412, 388, 97, "…"] }
     }
   ],
   "errors": [],
@@ -333,6 +340,7 @@ scriptable. Only the review UI is interactive.
 | `rescued` | `true` when the focus rescue flipped it to sharp (`sharp*` in the table) |
 | `aperture` | EXIF `FNumber`, or `null` when unavailable |
 | `pixelSource` | Which pixels were scored — e.g. `embedded-preview` for RAW |
+| `focusMap` | Sharpness per tile, row-major, turned upright like the photograph — where focus landed |
 | `relocated` | Present only with `--dest`. `planned: true` under `--dry-run`. |
 | `marked` | Present only with `--mark`: the labels used and how many records were written. |
 
