@@ -64,6 +64,20 @@ In order:
   so training through the plugin does not depend on XMP sidecars being up to
   date. Training and calibration start from the app and run on their own: they
   finish even if Lightroom closes. The standalone CLI keeps training from sidecars.
+- **Develop from Lightroom, and learn back.** The plugin applies the profile's
+  predictions to the selection as one undo step; once you have finished the
+  photos, the app compares what you kept with what was predicted and improves
+  the profile from the difference.
+- **Develop with intents.** Before applying, you tick what the shoot needs —
+  preserve highlights, open shadows, save the sky, expose correctly — and pick a
+  detail profile (B&W, warm, …): measured as how a subset of your edits departs
+  from the general profile and applied on top of it, never on its own. Intents
+  are explicit targets a tone solver meets frame by frame; region intents find
+  the sky and the subject with a local vision model
+  (Florence-2, MIT). Semantic features did not beat the histogram as predictor
+  inputs on one photographer's catalog; they are re-measured on beta data first.
+  Keywords come from the same optional vision pass; the CLI side is built, the
+  app screens and the Lightroom field test of intent strength are next.
 - **A closed beta that shares data.** Testers who opt in share derived
   measurements, never images, so the develop predictor can learn from many
   photographers instead of one. After the beta, sharing becomes an explicit

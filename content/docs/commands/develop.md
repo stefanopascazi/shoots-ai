@@ -15,6 +15,8 @@ shoots develop <subcommand> [options]
 | --- | --- |
 | [`init`](#shoots-develop-init) | Learn your style from an edited catalog (`export` + `train`) |
 | [`edit`](#shoots-develop-edit) | Develop a shoot with it (`export` + `predict`) |
+| [`apply`](#shoots-develop-apply) | The Lightroom plug-in's `edit`: predictions for a catalog selection, no sidecars |
+| [`style`](#shoots-develop-style) | Detail profiles (B&W, warm, …) applied on top of the general one |
 | [`feedback`](#shoots-develop-feedback) | How much of that prediction you kept |
 | [`refine`](#shoots-develop-refine) | Close the loop on a developed shoot: `feedback` + `learn` + `calibrate` |
 | [`calibrate`](#shoots-develop-calibrate) | Fix what it is wrong by on average (a constant offset) |
@@ -120,6 +122,11 @@ shoots develop edit <path> [options]
 | `--camera-profile <name>` | catalog's own | Base rendering to assume and write out |
 | `--baseline <mode>` | `external` | Must match the profile's, or `predict` refuses |
 | `--force` | off | Overwrite sidecars that already carry a real edit |
+| `--style <name>` | — | Detail profile to apply on top of the general one ([`style`](#shoots-develop-style)) |
+| `--style-strength <n>` | `1` | How much of the style to apply, 0..1 |
+| `--intent <id>` | — | Global develop intent, repeatable ([intents](#develop-intents)) |
+| `--intent-strength <n>` | saved, else `1` | How far the intents move the prediction, 0..1 |
+| `--intent-text <text>` | — | What you want in your own words (Italian or English), read into intents |
 | `--no-apply-marks` | apply on | Leave pending `cull`/`rate` marks in the store instead of writing them out |
 | `--dry-run` | off | Print the steps and the paths, write nothing |
 
@@ -149,6 +156,127 @@ Emitting `crs:` means templating the whole sidecar, so `edit` reads what is
 already there and merges it back afterwards: **`xmp:Label`, `xmp:Rating`,
 `dc:subject`, titles, captions and authorship are preserved.** Only the develop
 settings are replaced — which is what the `--force` guard is about.
+
+---
+
+## `shoots develop apply`
+
+```sh
+shoots develop apply --catalog <export.json> [--style <name>] --json
+```
+
+The Lightroom plug-in's `develop edit` (**Develop Selection**). The plug-in
+writes the selection's current settings as a catalog export; the shoot is
+exported and predicted as usual, and the predictions are printed as the
+settings tables `photo:applyDevelopSettings()` takes — crs names, the tone
+curve as a flat list, the creative profile as a `Look` table. Nothing is
+written beside the photographs. Each result says whether the photo already
+carries an edit; the plug-in replaces those only on an explicit yes.
+
+The baseline defaults to the profile's own. The prediction is kept in the
+shoot's working folder, as with `edit`; each run is folded in by file, so
+developing a folder in parts keeps every part for `refine`.
+
+`--profile`, `--treatment`, `--baseline`, `--style`, `--style-strength` and `--intent` work as in `edit`.
+
+`feedback`, `learn` and `refine` take `--catalog <export>` to read what you
+kept from the plug-in's export instead of the sidecars: the app's **Improve
+profile** runs `develop refine <folder> --catalog <export>`.
+
+---
+
+## `shoots develop style`
+
+Detail profiles. A style is **never a model of its own**: it is how a subset of
+your edits — the black-and-white work, the warm weddings — departs from what the
+general profile predicts for the same photographs, and it is applied as that
+departure on top of the general prediction. A style made from twenty photographs
+moves only what those twenty consistently do differently and inherits the rest.
+
+```sh
+shoots develop style train --name <name> --data <export.jsonl> [--profile <file>] [--description <text>] [--json]
+shoots develop style list [--json]
+```
+
+| Option (`train`) | Default | Description |
+| --- | --- | --- |
+| `--name <name>` | **required** | Saved as `~/.shoots/develop/styles/<name>.json` |
+| `--data <file>` | **required** | Dataset from `develop export` holding only the edits in this style |
+| `--profile <file>` | the one `init` wrote | General profile to measure against |
+| `--out <file>` | styles directory | Write the style elsewhere |
+| `--description <text>` | — | One line saying what the style is |
+
+Each parameter's departure is averaged **one shoot, one vote**, and kept only in
+proportion to how consistent it is (`1 − se²/mean²`, zero when the departure is
+within its own standard error). With fewer than three shoots the frame spread
+stands in for the shoot spread, so only departures that hold across every frame
+survive. Apply with `--style <name>` on `edit`, `apply` or `predict`;
+`--style-strength` scales it from 0 (the general profile) to 1.
+
+A style records which training of the general profile it was measured against;
+after a retrain it still applies, with a warning to re-run `style train`.
+
+### Develop intents
+
+What you ask of a shoot before applying, met **after** the general profile and
+any style — an intent is an explicit instruction and outranks what was learned.
+
+| Intent | Bound (measured on your own edits) | Sliders it may move |
+| --- | --- | --- |
+| `expose-correctly` | median within the middle half of yours | Exposure |
+| `preserve-highlights` | 99th percentile no brighter than your typical | Highlights, Whites |
+| `open-shadows` | 5th percentile as open as your more open third | Shadows, Blacks |
+| `keep-shadows-deep` | 5th percentile as deep as your deeper third | Shadows, Blacks |
+| `soft-contrast` | 10–90 spread 10 % narrower than predicted | Contrast |
+| `punchy-contrast` | 10–90 spread 10 % wider than predicted | Contrast |
+| `save-the-sky` | the sky's 95th percentile no brighter than your typical highlights | Highlights, Whites |
+| `lift-the-subject` | the subject's median no darker than the low edge of your band | Shadows, Exposure |
+
+Each bound is read on the look the prediction produces for that photograph, and
+relative to it: a frame that already meets an intent is left alone, one that
+does not moves only as far as the bound needs, and only with the sliders listed.
+A bound those sliders cannot reach is approached as far as they go. Colour,
+curve and white balance are never touched. Contradictory pairs
+(`open-shadows` + `keep-shadows-deep`, `soft-contrast` + `punchy-contrast`)
+are refused.
+
+The two region intents need to know where the sky and the subject are: they
+read each photograph with the vision model ([`shoots vision`](./vision.md)),
+from its cache when the shoot has been read before, and fetch the model on
+first use. They still move **global** sliders — Lightroom's plug-in interface
+cannot create masks — so "save the sky" is the Highlights and Whites that keep
+the sky's own pixels under the cap. A photograph without a sky, or without a
+person, is left alone by that intent.
+
+Each photograph's RAW is decoded to judge it (about a quarter of a second per
+frame, four at a time), so intents need the RAW developer `shoots setup`
+installs.
+
+```sh
+shoots develop intents calibrate [--data <export.jsonl>] [--sample 150]   # measure your thresholds
+shoots develop intents list [--json]                                       # the intents and the thresholds in force
+shoots develop intents set --strength <n>                                  # default intent strength, once tuned by eye
+shoots develop intents parse "<text>" [--json]                             # which intents a sentence asks for
+```
+
+`calibrate` decodes a sample of your colour edits, spread over shoots, renders
+each with your own settings in the tone model the intents are judged in, and
+saves the thresholds to `~/.shoots/develop/intents.json`. Measuring both sides
+in one rendering is the point: whatever it gets wrong about Lightroom's, it gets
+wrong on both, so it cancels. Until you calibrate, fixed defaults apply and
+`predict` says so.
+
+**In your own words.** `--intent-text "salva il cielo e apri un po' le ombre, contrasto morbido"`
+reads to save-the-sky, open-shadows and soft-contrast. The reading is a small
+Italian and English vocabulary, not a language model: it says what it understood
+and lists, clause by clause, what it did not ("rendilo vintage" is ignored, with
+a warning), and contradictory requests are refused like their flags. `intents
+parse` shows the reading without applying anything, for a screen that asks the
+photographer to confirm it first.
+
+`--intent-strength` scales how far the intents move each prediction (1 meets
+the bounds, 0.5 goes halfway). Tune it on a real shoot in your editor, then
+save it with `intents set --strength`; a later `calibrate` keeps it.
 
 ---
 
@@ -646,6 +774,11 @@ shoots develop predict --data <file> --profile <file> [options]
 | `--camera-profile <name>` | catalog's own | Base rendering to assume and write out |
 | `--out <file>` | stdout | Write predictions JSON here |
 | `--sidecars <dir>` | — | Also write an editor-readable sidecar per image into this dir (`.xmp` for `acr`, `.rrdata` for `rapidraw`) |
+| `--style <name>` | — | Detail profile to apply on top of the general one ([`style`](#shoots-develop-style)) |
+| `--style-strength <n>` | `1` | How much of the style to apply, 0..1 |
+| `--intent <id>` | — | Global develop intent, repeatable ([intents](#develop-intents)) |
+| `--intent-strength <n>` | saved, else `1` | How far the intents move the prediction, 0..1 |
+| `--intent-text <text>` | — | What you want in your own words (Italian or English), read into intents |
 
 `--treatment` is a genuine creative choice at inference time — at train time it is
 read off the edit, but for a new frame nobody has decided colour vs B&W yet.
