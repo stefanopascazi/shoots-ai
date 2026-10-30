@@ -260,6 +260,43 @@ Two flags govern how far all of this travels, on `train`, `learn`, `refine` and
 Rows are tagged `[never moves]`, `[constant]` (the level was gated) or
 `[flat within a shoot]` (the frame head was gated).
 
+### What a parameter is allowed to answer
+
+Every parameter ends up in one of three states, and the report, `develop status`
+and `develop predict --json` all say which:
+
+| State | What it means in the editor |
+| --- | --- |
+| `predicted` | The value follows this photograph. |
+| `leveled` | One value for the whole shoot: the model knows where the shoot sits but cannot tell its frames apart. |
+| `constant` | Your own catalog-wide value. The model declines to move it. |
+
+**`constant` is an answer, not a failure.** A parameter reaches it for one of
+three reasons, and the profile records which:
+
+- `degenerate` — you never varied it, so there is nothing to predict.
+- `low-skill` — its skill was positive but not clear of its own measurement
+  noise. This is the judgement `--boldness` moves.
+- `negative-skill` — predicting it was **measurably worse** than applying your
+  own average. This one no threshold can turn off: a prediction that costs
+  accuracy to make is not shipped, whatever boldness is set to.
+
+An anchored slider reports `predicted` whatever its heads did, because the anchor
+replaces both of them — see the anchored-slider table in the report for what it
+actually does.
+
+`develop predict --json` carries the same map under `parameters`, keyed by
+branch, so a script can tell a prediction from a passthrough without re-deriving
+it:
+
+```jsonc
+{
+  "parameters": {
+    "color": { "Exposure2012": "predicted", "Contrast2012": "leveled", "RedHue": "constant" }
+  }
+}
+```
+
 **`in-shoot` is the column to read.** end-end can look healthy on a model that
 only ever reproduces per-shoot averages; in-shoot is what decides whether a
 backlit frame and one in open shade come back with different numbers.
@@ -402,6 +439,9 @@ shoots develop refine ~/Shoots/2026-07-new
 of the steps they wrap, and accept `--dry-run`. `edit` refuses to overwrite
 sidecars that already carry a real edit unless you pass `--force`.
 
+`init` and `export` also take `--catalog <file>`: the develop settings then come
+from a Lightroom catalog export written by the plug-in, not from the sidecars.
+
 Import the sidecars in Lightroom and every frame opens on your look, ready to
 refine. `shoots develop status` says what the machine holds; `shoots develop
 clean` drops the per-shoot working files and leaves the profile alone.
@@ -451,7 +491,9 @@ never fill it in. Every run is therefore recorded in
 `~/.shoots/develop/feedback.jsonl` and the breakdown is computed over everything
 seen so far, with this run's own acceptance quoted separately above it. Ten
 shoots of eight carry the same signal as one shoot of eighty; `develop status`
-says how far along the journal is, and `develop clean` never touches it.
+says how far along the journal is, and `develop clean` leaves it alone unless
+you name it: `--only journal`. `--only` takes any of `shoots`, `dataset`,
+`profile`, `calibration` (keeps the fit) and `journal`.
 
 ### Closing the loop — `develop calibrate`
 

@@ -3,11 +3,13 @@
 Run a YAML pipeline: shoots commands in order, sharing one set of variables.
 
 ```
-shoots pipeline <config> [options]
+shoots pipeline <config> [options]        # run a pipeline file
+shoots pipeline init [file] [options]     # write one by answering questions
 ```
 
 The full format is documented in [Pipelines](../pipelines.md). This page is the
-command surface.
+command surface. (`shoots pipeline run <config>` is the explicit spelling of the
+first form; the bare `shoots pipeline <config>` is the same command.)
 
 ---
 
@@ -54,6 +56,88 @@ failure once you have fixed it.
 | `0` | Every step that ran succeeded |
 | `1` | At least one step failed |
 | `2` | The file could not be loaded, or does not resolve against this build's commands |
+
+---
+
+## `pipeline init`
+
+Writes a pipeline file by answering a handful of questions, for anyone who
+would rather not start from an empty YAML buffer.
+
+```
+shoots pipeline init [file] [options]
+```
+
+| Argument | Default | Description |
+| --- | --- | --- |
+| `[file]` | `shoots-pipeline.yaml` | Where to write |
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--template <name>` | — | Skip the questions: `shoot` or `train`, all defaults |
+| `--var <name=value>` | — | Answer a variable up front, e.g. `--var shoot=D:/Shoots/smith`. Repeatable |
+| `--name <name>` | preset's | Pipeline name written into the file |
+| `--plain` | off | Ask line by line instead of the full-screen wizard |
+| `--stdout` | off | Print the file instead of writing it |
+| `--force` | off | Replace the file if it already exists |
+| `--json` | off | Machine-readable report on stdout |
+
+### What it asks
+
+1. **What are you setting up?** — work on a shoot, or train your develop profile.
+2. *(shoot only)* **The whole pass, or particular steps?** — everything is
+   `import → rename → exif → rate → cull → develop edit`; picking opens the step
+   list, for a folder that is already on disk.
+3. **The folders**, and the artist name if `exif` is in.
+
+That is the whole wizard: two questions to set up training, five for a full
+shoot pass. It never asks anything a command already has a default for.
+
+### It writes scaffolding, not a finished config
+
+The generated file carries only what no default could supply — the folder, the
+artist name — plus the flags a command cannot run without (`import --dest`,
+`rename --pattern`), the `mark: true` that makes `rate` and `cull` one pass
+instead of two unrelated reports, and `rename --recursive`, without which a full
+pass would rename nothing (the offload files into dated subfolders). Everything a step *could* take is a commented
+hint under it:
+
+```yaml
+steps:
+  - id: rating
+    run: rate
+    args: ${shoot}
+    with:
+      mark: true
+    # also: profile: street | generic | portrait | wildlife · write-xmp: true
+```
+
+So the file starts minimal and legible, teaches you the format as you read it,
+and grows by editing — which is what a pipeline is for. Nothing is frozen at
+today's defaults: when a command's default changes, a generated pipeline
+follows it.
+
+### Front-ends
+
+On a terminal it opens the full-screen wizard: arrows move, space toggles a
+step, enter accepts, esc goes back one answer, and the finished file is shown
+before anything is written. `--plain` asks the same questions one line at a
+time — press enter to take every default. Without a terminal it refuses rather
+than guessing, so use `--template` for an unattended file.
+
+Inside the `shoots` shell, `/pipeline init` runs the same wizard in-process
+(the shell owns the terminal, so a child process has no stdin to ask with).
+It accepts `[file]`, `--var` and `--name` there; `--template`, `--plain` and
+`--stdout` are spawned as an ordinary command, exactly as they are outside.
+
+Whatever it writes is parsed and resolved against this build's real commands
+before it lands on disk, so a generated file always runs.
+
+```sh
+shoots pipeline init                                    # the wizard
+shoots pipeline init wedding.yaml --template shoot --var shoot=D:/Shoots/smith
+shoots pipeline init --template train --stdout          # print it, write nothing
+```
 
 ---
 
