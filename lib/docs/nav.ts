@@ -79,6 +79,11 @@ export const docsNav: DocsNavGroup[] = [
         summary: "The marks cull/rate record before they reach a sidecar",
       },
       { slug: ["commands", "embeddings"], title: "embeddings", summary: "Profile-neutral CLIP export" },
+      {
+        slug: ["commands", "vision"],
+        title: "vision",
+        summary: "Caption, objects, sky and subject per photograph, for keywords and region intents",
+      },
       { slug: ["commands", "match"], title: "match", summary: "Learn your eye from pairwise duels" },
       { slug: ["commands", "develop"], title: "develop", summary: "Personal develop-setting predictor" },
       {
